@@ -1,40 +1,42 @@
+import os
+import random
 import discord
 from discord.ext import commands
-import random
+from dotenv import load_dotenv
 
+# Load .env file (only works locally, Render uses its own environment variables)
+load_dotenv()
+
+TOKEN = os.getenv("DISCORD_TOKEN")  # keep your token safe in .env or Render env
+
+# Enable intents (adjust if you need more)
 intents = discord.Intents.default()
-intents.message_content = True  # Required for reading message content
+intents.message_content = True
+
 bot = commands.Bot(command_prefix="?", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"Bot connected as {bot.user}")
+    print(f"✅ Logged in as {bot.user}")
 
-@bot.command(name="send-note")
+@bot.command()
 async def send_note(ctx, channel_name: str, *, message: str):
-    # Find the channels
-    notes_channel = discord.utils.get(ctx.guild.text_channels, name="dropped-notes")
+    """?send-note [channel] [message]"""
+
+    # Find the channel
     target_channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
+    notes_channel = discord.utils.get(ctx.guild.text_channels, name="dropped-notes")
 
-    # If either doesn't exist, throw error
-    if notes_channel is None:
-        await ctx.send("Error: Could not find channel `notes`.")
-        return
-    if target_channel is None:
-        await ctx.send(f"Error: Could not find channel `{channel_name}`.")
+    if not target_channel or not notes_channel:
+        await ctx.send("❌ Could not find channel(s). Make sure they exist!")
         return
 
-    roll = random.random()
-    author_name = ctx.author.display_name  # or str(ctx.author) for full tag
-
-    if roll < 0.25:
-        # 25% → send to notes
-        formatted_msg = f'Note dropped from {author_name}. It reads "{message}"'
-        await notes_channel.send(formatted_msg)
+    # Random 25% vs 75%
+    chance = random.random()
+    if chance < 0.25:
+        await notes_channel.send(f'📒 Note dropped from {ctx.author.mention}. It reads "{message}"')
     else:
-        # 75% → send to target channel
-        formatted_msg = f'Note sent from {author_name}. It reads "{message}"'
-        await target_channel.send(formatted_msg)
+        await target_channel.send(f'📒 Note sent from {ctx.author.mention}. It reads "{message}"')
 
-# Run your bot
-bot.run("MTQwOTMyMzUyMDIwNjQzODU0Nw.G9SnUg.HSQ1P3KwJ9uQpq8dgCjjm5l43hO0_y8g2DYRnA")
+# Run the bot
+bot.run(TOKEN)
