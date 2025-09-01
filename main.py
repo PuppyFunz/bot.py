@@ -2,6 +2,10 @@ import discord
 from discord.ext import commands
 import random
 import os
+import threading
+from keep_alive import run
+
+threading.Thread(target=run).start()
 
 # Grab your token from Render environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
