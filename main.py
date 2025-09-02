@@ -26,7 +26,7 @@ async def on_ready():
 async def send_note(ctx, channel_name: str, *, message: str):
     # Try to find the channel by name
     target_channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
-    notes_channel = discord.utils.get(ctx.guild.text_channels, name="notes")
+    notes_channel = discord.utils.get(ctx.guild.text_channels, name="dropped-notes")
 
     if not target_channel or not notes_channel:
         await ctx.send("❌ Couldn't find the channel(s).")
